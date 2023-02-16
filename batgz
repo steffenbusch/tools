@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
+# A bash script to display the contents of a gzip-compressed file using the `bat` utility.
+# The script takes the filename of the compressed file as a command-line argument and 
+# passes any additional arguments to `bat`.
+
 # Exit immediately if a command exits with a non-zero status
 set -o errexit
+set -o pipefail
 
 function usage()
 {
@@ -30,6 +35,12 @@ done
 # If no filename was found, print the usage information and exit with an error status
 if [[ -z "$filename" ]]; then
   usage
+  exit 1
+fi
+
+# Check if the specified file exists
+if [[ ! -e "$filename" ]]; then
+  echo "Error: file '$filename' not found"
   exit 1
 fi
 
