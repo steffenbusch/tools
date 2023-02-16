@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+# A bash script to display the last n lines of a file using the `bat` utility.
+# The script takes the number of lines to display and the filename as command-line arguments, in that order.
+# Any additional arguments are passed through to `bat`.
+
+# Exit immediately if a command exits with a non-zero status
+set -o errexit
+set -o pipefail
+
+function usage()
+{
+  echo "Usage: $0 [-n lines] filename [bat options]"
+  echo
+  echo "Options:"
+  echo "  -n lines: The number of lines to display from the bottom of the file. Default value: 10"
+  echo
+  echo "Examples:"
+  echo "  $0 example.txt                  # Display the last 10 lines of example.txt"
+  echo "  $0 -n 20 example.txt            # Display the last 20 lines of example.txt"
+  echo "  $0 example.txt --language=html  # Display the last 10 lines of example.txt with html syntax highlighting"
+}
+
+# Check if the script was called with at least one argument
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 1
+fi
+
+# Set default values for the number of lines and any additional bat options
+lines=10
+bat_options=()
+
+# Parse the command-line arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -n)
+      # Set the number of lines to display
+      lines="$2"
+      shift 2
+      ;;
+    -*)
+      # Collect any additional bat options
+      bat_options+=("$1")
+      shift
+      ;;
+    *)
+      if [[ -e "$1" ]]; then
+        # Set the filename
+        filename="$1"
+        shift
+      else
+        # Pass the argument to bat
+        bat_options+=("$1")
+        shift
+      fi
+      ;;
+  esac
+done
+
+# If no filename was found, print the usage information and exit with an error status
+if [[ -z "$filename" ]]; then
+  usage
+  exit 1
+fi
+
+# Determine the number of lines to display
+total_lines=$(wc -l "$filename" | awk '{print $1}')
+start_line=$((total_lines - lines +1))
+if [[ $start_line -lt 1 ]]; then
+  start_line=1
+fi
+
+# Display the desired last N lines of the file using bat
+# Pass the bat options to bat
+bat --line-range=${start_line}: "${bat_options[@]}" "$filename"
