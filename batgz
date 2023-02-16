@@ -1,0 +1,38 @@
+#!/usr/local/env bash
+
+# Exit immediately if a command exits with a non-zero status
+set -o errexit
+
+function usage()
+{
+  echo "Usage: $0 [bat options] filename.gz"
+  echo
+  echo "Examples:"
+  echo "  $0 example.gz                  # Display the contents of example.gz with default options"
+  echo "  $0 -r 10:20 example.gz         # Display lines 10 to 20 of example.gz"
+}
+
+# Check if the script was called with at least one argument
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 1
+fi
+
+# Look for the filename in the command-line arguments
+filename=
+for arg in "$@"; do
+  if [[ "$arg" == *.gz ]]; then
+    filename="$arg"
+    break
+  fi
+done
+
+# If no filename was found, print the usage information and exit with an error status
+if [[ -z "$filename" ]]; then
+  usage
+  exit 1
+fi
+
+# Display the contents of the file using bat
+# Pass the bat options and the filename to bat
+zcat "$filename" | bat --file-name="$filename" "${@:1:$#-1}"
