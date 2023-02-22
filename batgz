@@ -23,13 +23,29 @@ if [[ $# -lt 1 ]]; then
   exit 1
 fi
 
-# Look for the filename in the command-line arguments
+# Parse the command-line arguments
+bat_options=()
 filename=
-for arg in "$@"; do
-  if [[ "$arg" == *.gz ]]; then
-    filename="$arg"
-    break
-  fi
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -*)
+      # Collect any additional bat options
+      bat_options+=("$1")
+      shift
+      ;;
+    *)
+      if [[ -e "$1" ]]; then
+        # Set the filename
+        filename="$1"
+        shift
+      else
+        # Pass the argument to bat
+        bat_options+=("$1")
+        shift
+      fi
+      ;;
+  esac
 done
 
 # If no filename was found, print the usage information and exit with an error status
@@ -46,4 +62,4 @@ fi
 
 # Display the contents of the file using bat
 # Pass the bat options and the filename to bat
-zcat "$filename" | bat --file-name="$filename" "${@:1:$#-1}"
+zcat "$filename" | bat "${bat_options[@]}" --file-name="$filename"
