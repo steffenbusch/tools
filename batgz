@@ -60,6 +60,12 @@ if [[ ! -e "$filename" ]]; then
   exit 1
 fi
 
+# If a null byte is found, add the '--show-all' option to bat_options, which will cause bat
+# to display all bytes, including non-printable characters, when displaying the contents of the file.
+if zcat "$filename" | LANG=C grep --quiet --max-count=1 --binary --text --perl-regexp '\x00'; then
+  bat_options+=("--show-all")
+fi
+
 # Display the contents of the file using bat
 # Pass the bat options and the filename to bat
 zcat "$filename" | bat "${bat_options[@]}" --file-name="$filename"
