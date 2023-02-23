@@ -6,7 +6,6 @@
 
 # Exit immediately if a command exits with a non-zero status
 set -o errexit
-set -o pipefail
 
 # Improve output when invoked with `bash -x`
 export PS4='+|${BASH_SOURCE##*/} ${LINENO}${FUNCNAME[0]:+ ${FUNCNAME[0]}} | '
@@ -65,7 +64,9 @@ fi
 
 # If a null byte is found, add the '--show-all' option to bat_options, which will cause bat
 # to display all bytes, including non-printable characters, when displaying the contents of the file.
-if zcat "$filename" | LANG=C grep --quiet --max-count=1 --binary --text --perl-regexp '\x00'; then
+# Note: 
+# `set -o pipefail` is not used, because zcat will be signaled by grep with SIGPIPE on first hit
+if zcat "$filename" | LANG=C grep --quiet --max-count=1 --text --perl-regexp '\x00'; then
   bat_options+=("--show-all")
 fi
 
