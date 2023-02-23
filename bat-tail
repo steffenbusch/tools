@@ -8,6 +8,9 @@
 set -o errexit
 set -o pipefail
 
+# Improve output when invoked with `bash -x`
+export PS4='+|${BASH_SOURCE##*/} ${LINENO}${FUNCNAME[0]:+ ${FUNCNAME[0]}} | '
+
 function usage()
 {
   echo "Usage: $0 [-n lines] filename [bat options]"
